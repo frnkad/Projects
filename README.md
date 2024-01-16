@@ -6,7 +6,7 @@ SQL
 
 Python
 - Mobile Banking [Let's Try On Replit](https://replit.com/@NitikarnKadsrit?path= )
-- Store [Let's Try On Datalore](https://datalore.jetbrains.com/notebook/k6PoiTajayVSmRRMmYa3rZ/uMf1baMlL690ue92mrvLSL)
+- Store [Let's Try On Datalore](https://datalore.jetbrains.com/notebook/k6PoiTajayVSmRRMmYa3rZ/uMf1baMlL690ue92mrvLSL/)
 
 R
 - Homemade Pizza [Let's Try On Replit](https://replit.com/@NitikarnKadsrit?path= )
