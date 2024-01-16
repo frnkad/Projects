@@ -1,0 +1,183 @@
+-- Restaurant Owners
+-- 5 Tables
+-- 1x Fact, 4x Dimension
+-- search google, how to add foreign key
+-- write SQL 3 queries analyze data
+-- 1x subquery/with
+
+-- Fact = menu
+-- Dimensions = orders, customers, payment, menu_typeSELECT 
+
+CREATE TABLE menu (
+    menu_id INT PRIMARY KEY,
+    menu_name TEXT,
+    price REAL,
+    menu_type_id INT, 
+    menu_type TEXT,
+    FOREIGN KEY (menu_type_id) REFERENCES menu_type(menu_type_id)
+);
+
+INSERT INTO menu VALUES
+    (1, 'Ramen', 350, 1, 'food'),
+    (2, 'Dumpling', 80, 1, 'food'),
+    (3, 'Taco', 240, 1, 'food'),
+    (4, 'Carbonara', 280, 1, 'food'),
+    (5, 'Panna cotta', 160, 2, 'dessert'),
+    (6, 'Apple pie', 180, 2, 'dessert'),
+    (7, 'Lemon iced tea', 80, 3, 'beverage'),
+    (8, 'Iced latte', 110, 3, 'beverage');
+
+
+
+CREATE TABLE orders (
+  	order_id INT PRIMARY KEY,
+   	order_date DATE,
+ 	  customer_id TEXT,
+    menu_id INT,
+    amount REAL,
+    FOREIGN KEY (menu_id) REFERENCES menu(menu_id)
+);
+
+INSERT INTO orders VALUES
+    (999001, '2022-11-19', 'C001', 1, 350),
+    (999002, '2022-11-19', 'C002', 4, 240),
+    (999003, '2022-11-19', 'C003', 2, 590),
+    (999004, '2022-11-20', 'C004', 5, 280),
+    (999005, '2022-11-20', 'C005', 7, 180),
+    (999006, '2022-11-21', 'C006', 6, 160),
+    (999007, '2022-11-22', 'C007', 8, 220),
+    (999008, '2022-11-22', 'C008', 1, 350),
+    (999009, '2022-11-22', 'C009', 4, 240),
+    (999010, '2022-11-23', 'C010', 1, 350);
+
+
+
+CREATE TABLE customers (
+  	customer_id TEXT PRIMARY KEY,
+  	customer_name TEXT,
+  	gender TEXT,
+  	phone_number TEXT,
+    order_id INT,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+Insert into customers values
+    ('C001', 'Mila', 	'Female', 	'0912345678', 999001),
+    ('C002', 'Gena', 	'Female', 	'0987654321', 999002),
+    ('C003', 'Anne', 	'Female', 	'0881112222', 999003),
+    ('C004', 'Liliana', 'Female', 	'0812342345', 999004),
+    ('C005', 'Logan', 	'Male', 	'0453278510', 999005),
+    ('C006', 'Chris', 	'Male',		'0325786664', 999006),
+    ('C007', 'Moana', 	'Female',	'0784312264', 999007),
+    ('C008', 'Jasmine', 'Female', 	'0965664312', 999008),
+    ('C009', 'Leo', 	'Male',		'0657438999', 999009),
+    ('C010', 'Robert', 	'Male', 	'0142674912', 999010);
+
+
+
+CREATE TABLE payment (
+  	order_id INT PRIMARY KEY,
+  	payment_option TEXT,
+  	customer_id TEXT,
+    FOREIGN KEY (customer_id) REFERENCES customers(cutomer_id)
+);
+
+INSERT INTO payment VALUES
+	  (999001, 'Credit Card',  'C001'),
+    (999002, 'Cash',         'C002'),
+    (999003, 'Credit Card',  'C003'),
+    (999004, 'Cash',         'C004'),
+    (999005, 'Cash',         'C005'),
+    (999006, 'Cash',         'C006'),
+    (999007, 'Cash',         'C007'),
+    (999008, 'Credit Card',  'C008'),
+    (999009, 'Cash',         'C009'),
+    (999010, 'Credit Card',  'C010');
+
+
+
+CREATE TABLE menu_type (
+    menu_type_id INT PRIMARY KEY,
+    menu_type TEXT
+);
+
+INSERT INTO menu_type VALUES
+          (1, 'food'),
+          (2, 'dessert'),
+          (3, 'beverage');
+
+
+
+.mode column
+.header on
+
+  
+-- Query 1 Menu list
+SELECT 
+  m.menu_id AS MenuID,
+  m.menu_name AS Menu,
+  m.price AS Price,
+  mt.menu_type AS FoodType
+FROM menu AS m
+JOIN menu_type AS mt ON m.menu_type_id=mt.menu_type_id;
+
+
+-- Query 2 Show amount and payment method
+SELECT 
+  c.order_id AS OrderID,
+  o.amount AS Amount,
+  c.customer_id AS CustomerID,
+  c.customer_name AS Name,
+  p.payment_option AS PaymentOption
+FROM customers AS c
+JOIN payment AS p ON c.customer_id = p.customer_id
+JOIN orders AS o ON o.order_id = c.order_id;
+
+
+--Query 3 Highest amount on each day
+SELECT
+  o.order_date AS OrderDate,
+  MAX(o.amount) AS MaxAmount,
+  o.order_id AS OrderID
+FROM orders AS o
+Group By o.order_date;
+
+-- With/Subqueries
+
+
+--With 
+WITH Order_information AS 
+(SELECT 
+    c.order_id AS OrderID,
+    o.amount AS Amount,
+    c.customer_id AS CustomerID,
+    c.customer_name AS Name,
+    p.payment_option AS PaymentOption
+  FROM customers AS c
+  JOIN payment AS p ON c.customer_id = p.customer_id
+  JOIN orders AS o ON o.order_id = c.order_id)
+
+SELECT 
+  PaymentOption,
+  Count(*) AS Frequency
+FROM Order_information
+Group By PaymentOption;
+Order BY PaymentOption DESC;
+
+
+--Subquery
+SELECT 
+  PaymentOption,
+  COUNT(*) AS Frequency
+FROM 
+  (SELECT 
+    c.order_id AS OrderID,
+    o.amount AS Amount,
+    c.customer_id AS CustomerID,
+    c.customer_name AS Name,
+    p.payment_option AS PaymentOption
+  FROM customers AS c
+  JOIN payment AS p ON c.customer_id = p.customer_id
+  JOIN orders AS o ON o.order_id = c.order_id)
+Group By PaymentOption;
+Order BY PaymentOption DESC;
